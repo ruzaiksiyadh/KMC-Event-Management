@@ -1,0 +1,223 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+
+    string ImageForType(string type) => (type ?? "").ToLower() switch
+    {
+        "cultural" => "/images/category-cultural.jpg",
+        "music" => "/images/category-music.jpg",
+        "sports" => "/images/category-sports.jpg",
+        "food" => "/images/category-food.jpg",
+        "business" => "/images/category-business.jpg",
+        "education" => "/images/category-education.jpg",
+        "community" => "/images/category-community.jpg",
+        "entertainment" => "/images/category-entertainment.jpg",
+        _ => "/images/category-default.jpg"
+    };
+
+    var categories = new[] { "Cultural", "Music", "Sports", "Food", "Business", "Education", "Community", "Entertainment" };
+}
+
+<!-- ============ HERO ============ -->
+<section class="hero-cinematic">
+    <div class="hero-bg-image"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <span class="hero-badge">Discover Kandy &bull; Events &amp; Experiences</span>
+        <h1>Discover what's<br />happening in Kandy</h1>
+        <p class="hero-sub-text">Find events, discover new experiences, and connect with the community across Kandy.</p>
+        <div class="hero-cta-row">
+            <a asp-controller="Events" asp-action="Index" class="cta-primary">
+                Explore Events
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <a asp-controller="Account" asp-action="Register" class="cta-secondary">Organize an Event</a>
+        </div>
+    </div>
+</section>
+
+<!-- ============ SEARCH CARD ============ -->
+<div class="search-card-wrap">
+    <div class="search-glass-card reveal">
+        <h2>Find Your Next Experience</h2>
+        <p class="search-sub">Search events happening across Kandy.</p>
+        <form asp-controller="Events" asp-action="Index" method="get">
+            <div class="search-fields-grid">
+                <div class="search-field">
+                    <label>Search Event</label>
+                    <input type="text" name="keyword" class="form-control" placeholder="What are you looking for?" />
+                </div>
+                <div class="search-field">
+                    <label>Location</label>
+                    <input type="text" class="form-control" value="Kandy" readonly />
+                </div>
+                <div class="search-field">
+                    <label>Date</label>
+                    <input type="date" name="fromDate" class="form-control" />
+                </div>
+                <div class="search-field">
+                    <label>Event Type</label>
+                    <select name="eventType" class="form-control">
+                        <option value="">Any type</option>
+                        @foreach (var c in categories)
+                        {
+                            <option value="@c">@c</option>
+                        }
+                    </select>
+                </div>
+                <div class="search-field">
+                    <button type="submit" class="btn btn-primary w-100">Search Events</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============ FEATURED EVENTS ============ -->
+<section class="section-dark">
+    <div class="container">
+        <div class="section-label-lg reveal">Featured Events</div>
+        <h2 class="section-heading reveal">Discover what's happening around Kandy.</h2>
+        <p class="section-sub reveal">Discover what's happening around Kandy.</p>
+
+        @if (!Model.FeaturedEvents.Any())
+        {
+            <div class="empty-state">No events yet — <a asp-controller="Account" asp-action="Register" style="text-decoration:underline;">be the first to organize one</a>.</div>
+        }
+        else
+        {
+            <div class="featured-grid">
+                @foreach (var ev in Model.FeaturedEvents)
+                {
+                    <a asp-controller="Events" asp-action="Details" asp-route-id="@ev.Id" class="feature-card reveal d-block">
+                        <div class="feature-image-wrap">
+                            <img src="@ImageForType(ev.EventType)" alt="@ev.Title" />
+                            <span class="feature-badge">@ev.EventType</span>
+                        </div>
+                        <div class="feature-body">
+                            <h5>@ev.Title</h5>
+                            <p class="feature-meta">@ev.EventDate.ToString("dd MMM yyyy") &middot; @ev.Location</p>
+                            <p class="feature-desc">@(ev.Description.Length > 90 ? ev.Description.Substring(0, 90) + "..." : ev.Description)</p>
+                            <span class="feature-link">
+                                View Event
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                            </span>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="section-dark tight">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="reveal">
+                <div class="stat-big-number" data-counter="@Model.TotalEvents" data-suffix="+">0</div>
+                <div class="stat-label-sm">Events</div>
+            </div>
+            <div class="reveal reveal-delay-1">
+                <div class="stat-big-number" data-counter="@Model.TotalParticipants" data-suffix="+">0</div>
+                <div class="stat-label-sm">Participants</div>
+            </div>
+            <div class="reveal reveal-delay-2">
+                <div class="stat-big-number" data-counter="@Model.TotalOrganizers" data-suffix="+">0</div>
+                <div class="stat-label-sm">Organizers</div>
+            </div>
+            <div class="reveal reveal-delay-3">
+                <div class="stat-big-number" data-counter="@Model.TotalCategories" data-suffix="+">0</div>
+                <div class="stat-label-sm">Event Categories</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ WHY KMC EVENTS ============ -->
+<section class="section-dark">
+    <div class="container">
+        <div class="section-label-lg reveal">Why KMC Events</div>
+        <h2 class="section-heading reveal">Everything happening in one place</h2>
+        <div class="why-grid" style="margin-top:44px;">
+            <div class="why-card reveal">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <h5>Discover</h5>
+                <p>Find events based on date, category and location.</p>
+            </div>
+            <div class="why-card reveal reveal-delay-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                <h5>Connect</h5>
+                <p>Discover activities and experiences happening across Kandy.</p>
+            </div>
+            <div class="why-card reveal reveal-delay-2">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M9 12h6M9 16h6M9 8h6"/><rect x="4" y="3" width="16" height="18" rx="2"/></svg>
+                <h5>Register</h5>
+                <p>Quickly register for events directly through the platform.</p>
+            </div>
+            <div class="why-card reveal reveal-delay-3">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                <h5>Organize</h5>
+                <p>Event organizers can create and manage their own events.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section-dark">
+    <div class="container">
+        <div class="section-label-lg reveal" style="text-align:center;">How It Works</div>
+        <h2 class="section-heading reveal" style="text-align:center; margin: 0 auto 50px;">From browsing to attending</h2>
+        <div class="timeline">
+            <div class="timeline-step reveal">
+                <div class="timeline-num">01</div>
+                <div class="timeline-copy"><h5>Discover</h5><p>Browse events happening around Kandy.</p></div>
+            </div>
+            <div class="timeline-step reveal reveal-delay-1">
+                <div class="timeline-num">02</div>
+                <div class="timeline-copy"><h5>Search</h5><p>Filter events by date, category and other criteria.</p></div>
+            </div>
+            <div class="timeline-step reveal reveal-delay-2">
+                <div class="timeline-num">03</div>
+                <div class="timeline-copy"><h5>Register</h5><p>Choose an event and register.</p></div>
+            </div>
+            <div class="timeline-step reveal reveal-delay-3">
+                <div class="timeline-num">04</div>
+                <div class="timeline-copy"><h5>Experience</h5><p>Attend and enjoy the event.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ CATEGORIES ============ -->
+<section class="section-dark tight">
+    <div class="container">
+        <div class="section-label-lg reveal">Browse by Category</div>
+        <h2 class="section-heading reveal" style="margin-bottom:40px;">Find your kind of event</h2>
+        <div class="category-grid">
+            <a class="category-card reveal" asp-controller="Events" asp-action="Index" asp-route-eventType="Cultural"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg><span>Cultural</span></a>
+            <a class="category-card reveal" asp-controller="Events" asp-action="Index" asp-route-eventType="Music"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Music</span></a>
+            <a class="category-card reveal" asp-controller="Events" asp-action="Index" asp-route-eventType="Sports"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg><span>Sports</span></a>
+            <a class="category-card reveal" asp-controller="Events" asp-action="Index" asp-route-eventType="Food"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8Z"/></svg><span>Food</span></a>
+            <a class="category-card reveal" asp-controller="Events" asp-action="Index" asp-route-eventType="Business"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><span>Business</span></a>
+            <a class="category-card reveal" asp-controller="Events" asp-action="Index" asp-route-eventType="Education"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="m22 10-10-5L2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg><span>Education</span></a>
+            <a class="category-card reveal" asp-controller="Events" asp-action="Index" asp-route-eventType="Community"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Community</span></a>
+            <a class="category-card reveal" asp-controller="Events" asp-action="Index" asp-route-eventType="Entertainment"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m10 9 5 3-5 3V9Z"/></svg><span>Entertainment</span></a>
+        </div>
+    </div>
+</section>
+
+<!-- ============ BIG CTA ============ -->
+<section class="cta-band">
+    <div class="cta-band-bg"></div>
+    <div class="cta-band-overlay"></div>
+    <div class="cta-band-content reveal">
+        <h2>Have an Event to Share?</h2>
+        <p>Bring your event to the Kandy community.</p>
+        <a asp-controller="Account" asp-action="Register" class="cta-primary">
+            Create Your Event
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+    </div>
+</section>

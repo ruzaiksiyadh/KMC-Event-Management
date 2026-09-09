@@ -1,0 +1,28 @@
+@model RegisterParticipantViewModel
+@{
+    ViewData["Title"] = "Register - " + Model.EventTitle;
+}
+
+<div class="container content-wrap">
+    <div class="auth-card">
+        <h1>Register for @Model.EventTitle</h1>
+        <p class="auth-sub">Just your name and email — no account needed.</p>
+
+        <div asp-validation-summary="All" class="alert-danger mb-3"></div>
+
+        <form asp-action="Register" method="post">
+            <input type="hidden" asp-for="EventId" />
+            <input type="hidden" asp-for="EventTitle" />
+
+            <div class="mb-3">
+                <label asp-for="ParticipantName">Your Name</label>
+                <input asp-for="ParticipantName" class="form-control" required />
+            </div>
+            <div class="mb-4">
+                <label asp-for="ParticipantEmail">Email</label>
+                <input asp-for="ParticipantEmail" type="email" class="form-control" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Confirm Registration</button>
+        </form>
+    </div>
+</div>

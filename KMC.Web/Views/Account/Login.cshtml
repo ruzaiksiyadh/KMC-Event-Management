@@ -1,0 +1,29 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Organizer Login";
+}
+
+<div class="container content-wrap">
+    <div class="auth-card">
+        <h1>Organizer Login</h1>
+        <p class="auth-sub">Log in to manage your events.</p>
+
+        @if (Model.Error != null)
+        {
+            <div class="alert-danger mb-3">@Model.Error</div>
+        }
+
+        <form asp-action="Login" method="post">
+            <div class="mb-3">
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" type="email" class="form-control" required />
+            </div>
+            <div class="mb-4">
+                <label asp-for="Password">Password</label>
+                <input asp-for="Password" type="password" class="form-control" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mb-3">Log in</button>
+            <a asp-action="Register" class="nav-link-mono d-block text-center">Need an account? Register</a>
+        </form>
+    </div>
+</div>

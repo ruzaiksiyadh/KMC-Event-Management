@@ -1,0 +1,16 @@
+@model CreateEventViewModel
+@{
+    ViewData["Title"] = "New Event";
+    Layout = "_DashboardLayout";
+}
+
+<div class="sidebar-eyebrow mb-2">ORGANIZER</div>
+<h1 class="mb-4">Create Event</h1>
+<div asp-validation-summary="All" class="alert-danger mb-3"></div>
+
+<div class="detail-card" style="max-width:640px;">
+    <form asp-action="Create" method="post">
+        <partial name="_EventForm" />
+        <button type="submit" class="btn btn-primary w-100">Create Event</button>
+    </form>
+</div>

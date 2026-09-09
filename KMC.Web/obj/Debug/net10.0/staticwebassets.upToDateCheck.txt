@@ -1,0 +1,15 @@
+wwwroot\css\site.css
+wwwroot\images\cta-banner.jpg
+wwwroot\images\hero.jpg
+wwwroot\js\site.js
+wwwroot\images\category-business.jpg
+wwwroot\images\category-community.jpg
+wwwroot\images\category-cultural.jpg
+wwwroot\images\category-default.jpg
+wwwroot\images\category-education.jpg
+wwwroot\images\category-entertainment.jpg
+wwwroot\images\category-food.jpg
+wwwroot\images\category-music.jpg
+wwwroot\images\category-sports.jpg
+C:\Users\WW\Documents\KMC-EventPlatform\KMC.Web\wwwroot\js\site.js
+C:\Users\WW\Documents\KMC-EventPlatform\KMC.Web\wwwroot\css\site.css

@@ -1,0 +1,33 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register as Organizer";
+}
+
+<div class="container content-wrap">
+    <div class="auth-card">
+        <h1>Register as an Organizer</h1>
+        <p class="auth-sub">Create an account to publish and manage your own events.</p>
+
+        @if (Model.Error != null)
+        {
+            <div class="alert-danger mb-3">@Model.Error</div>
+        }
+
+        <form asp-action="Register" method="post">
+            <div class="mb-3">
+                <label asp-for="DisplayName">Organization / Display Name</label>
+                <input asp-for="DisplayName" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" type="email" class="form-control" required />
+            </div>
+            <div class="mb-4">
+                <label asp-for="Password">Password</label>
+                <input asp-for="Password" type="password" class="form-control" required minlength="6" />
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
+            <a asp-action="Login" class="nav-link-mono d-block text-center">Already registered? Log in</a>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,77 @@
+@model EventSearchViewModel
+@{
+    ViewData["Title"] = "Upcoming Events";
+
+    string IconFor(string type) => (type ?? "").Trim().ToLower() switch
+    {
+        "cultural" => "<path d=\"M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6\"/>",
+        "music" => "<path d=\"M9 18V5l12-2v13\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><circle cx=\"18\" cy=\"16\" r=\"3\"/>",
+        "sports" => "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 3v18M3 12h18\"/>",
+        "food" => "<path d=\"M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8Z\"/>",
+        "business" => "<rect x=\"2\" y=\"7\" width=\"20\" height=\"14\" rx=\"2\"/><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"/>",
+        "education" => "<path d=\"m22 10-10-5L2 10l10 5 10-5Z\"/><path d=\"M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5\"/>",
+        "community" => "<path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75\"/>",
+        "entertainment" => "<rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"/><path d=\"m10 9 5 3-5 3V9Z\"/>",
+        _ => "<path d=\"M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3v5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l3.59-3.59a2 2 0 0 0 0-2.83Z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\"1\"/>"
+    };
+}
+
+<div class="container content-wrap">
+    @if (TempData["Message"] != null)
+    {
+        <div class="flash-message">@TempData["Message"]</div>
+    }
+
+    <div class="hero-card">
+        <div class="hero-eyebrow">Kandy Municipal Council</div>
+        <h1>Community events across Kandy</h1>
+        <p class="hero-sub">Browse markets, concerts, and community gatherings organised by the council and local organisers. Search below and register in a few clicks.</p>
+        <a href="#events" class="btn-pill btn-pill-solid">Browse events</a>
+    </div>
+
+    <form method="get" class="row g-3 search-form">
+        <div class="col-md-4">
+            <input type="text" name="keyword" value="@Model.Keyword" class="form-control" placeholder="Search title or description" />
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="eventType" value="@Model.EventType" class="form-control" placeholder="Type — Market, Music, Sports" />
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Go</button>
+        </div>
+    </form>
+
+    <div id="events" class="section-label">All events</div>
+
+    @if (!Model.Results.Any())
+    {
+        <div class="empty-state">No events match your search.</div>
+    }
+
+    <div class="row">
+        @foreach (var ev in Model.Results)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card event-card h-100">
+                    <div class="card-body p-4">
+                        <span class="event-type-tag">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8">@Html.Raw(IconFor(ev.EventType))</svg>
+                            @ev.EventType
+                        </span>
+                        <h5 class="card-title">@ev.Title</h5>
+                        <p class="event-meta">@ev.EventDate.ToString("dddd, dd MMM yyyy") &middot; @ev.Location</p>
+                        <p class="card-text">@(ev.Description.Length > 100 ? ev.Description.Substring(0, 100) + "..." : ev.Description)</p>
+                        <p class="registered-count">@ev.RegisteredCount / @ev.Capacity registered</p>
+                        <a asp-action="Details" asp-route-id="@ev.Id" class="btn btn-outline-primary btn-sm">View & Register</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
