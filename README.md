@@ -1,110 +1,250 @@
-# KMC Community Event Platform — Starter Solution
+# KMC Events — Kandy Municipal Council Event Platform
 
-A scaffold for the CSE5013 (Service-Oriented Computing) assignment: Kandy Municipal
-Council event platform, built as a REST API + a Razor/MVC client that consumes it.
+A service-oriented community event management platform developed for the **CSE5013 — Service-Oriented Computing** module.
 
-## Structure
+The system allows members of the public to discover and register for community events, while event organizers can create and manage their own events through an authenticated dashboard.
 
+The solution is implemented as **two independently running applications** — a RESTful Web API and an MVC web application — demonstrating service-oriented architecture principles.
+
+---
+
+## Features
+
+### Public Users
+
+* Browse available community events
+* Search events by keyword
+* Filter events by event type and date
+* View individual event details
+* Register for events without creating an account
+* Receive validation when an event reaches its capacity
+
+### Organizers
+
+* Create an organizer account
+* Log in securely
+* Create new events
+* View and manage their own events
+* Edit their own events
+* Delete their own events
+* View the list of registered attendees for their events
+
+### Security
+
+* JWT-based authentication
+* Ownership-based authorization — organizers can only modify or view registrations for events they created
+* Organizer ownership validation
+* Event modification restricted to the event owner
+* API-level authorization rather than relying only on frontend restrictions
+
+---
+
+## Service-Oriented Architecture
+
+The system is intentionally separated into two projects:
+
+```text
+┌─────────────────────────┐
+│       KMC.Web           │
+│  ASP.NET Core MVC       │
+│                         │
+│  Razor Views            │
+│  Controllers            │
+│  ApiClient.cs           │
+└────────────┬────────────┘
+             │
+             │ HTTP / REST
+             ▼
+┌─────────────────────────┐
+│       KMC.Api           │
+│  ASP.NET Core Web API   │
+│                         │
+│  Controllers            │
+│  Services               │
+│  DTOs                   │
+│  Authentication         │
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│     SQLite Database     │
+│      EF Core            │
+└─────────────────────────┘
 ```
-KMC-EventPlatform/
-  KMC.sln
-  KMC.Api/        ASP.NET Core Web API — the "service" layer
-    Controllers/   AuthController, EventsController, RegistrationsController
-    Services/      IEventService/EventService, IRegistrationService/RegistrationService, ITokenService/TokenService
-    Models/        Event, Registration, ApplicationUser
-    Data/          ApplicationDbContext (EF Core + SQLite)
-  KMC.Web/         ASP.NET Core MVC (Razor) — the client, talks ONLY to the API
-    Controllers/   Home, Events (public), Account (login/register), Dashboard (organizer, [Authorize])
-    Services/      ApiClient.cs — every API call goes through this one class
-    Views/         Razor pages for browsing, registering, and managing events
-```
 
-## Why this design demonstrates SOC
+### KMC.Api
 
-- **Separation of concerns**: business logic lives in `Services/` behind interfaces, never
-  directly in controllers. Controllers are thin — they just translate HTTP <-> service calls.
-  This is exactly the seam you'd cut along if you split `EventService`, `RegistrationService`
-  into independently deployable microservices later — which is a good point to make in your
-  written comparison (Task 1).
-- **The MVC client never touches the database.** It only calls the API over HTTP through
-  `ApiClient.cs`. Swap KMC.Web for a mobile app or another council's system and the API
-  doesn't change — that's the core SOA argument for maintainability/scalability vs a monolith.
-- **Ownership enforcement**: `EventService.UpdateAsync`/`DeleteAsync` throw
-  `UnauthorizedAccessException` if the caller isn't the event's creator — satisfies the
-  "only the organizer who created it can edit it" requirement.
-- **Public vs authenticated split**: search/browse/register endpoints are `[AllowAnonymous]`;
-  create/edit/delete/view-registrations require a JWT — matches "public users search/register,
-  organizers manage."
+The REST API is responsible for:
 
-## Running it locally
+* Authentication and authorization
+* Event management
+* Event registrations
+* Business logic
+* Ownership validation
+* Database operations
+* Data persistence
 
-You'll need the [.NET 10 SDK](https://dotnet.microsoft.com/download) installed (this
-sandbox doesn't have it, so the code hasn't been compiled here — read it over once before
-your first run).
+The API is the **only application that directly accesses the database**.
+
+### KMC.Web
+
+The MVC website provides the user-facing interface.
+
+It does **not** directly access the database. All data retrieval and operations are performed through `ApiClient.cs`, which communicates with the REST API over HTTP.
+
+This separation demonstrates the service-oriented principle of separating the **service layer** from the **consumer/application layer**.
+
+---
+
+## How to Run
+
+### Prerequisites
+
+* [.NET 10 SDK](https://dotnet.microsoft.com/)
+* Visual Studio 2022 or another compatible IDE
+* Git
+
+### Clone the repository
 
 ```bash
+git clone <YOUR-REPOSITORY-URL>
 cd KMC-EventPlatform
-
-# 1. Restore & build both projects
-dotnet restore
-dotnet build
-
-# 2. Run the API first (creates kmc_events.db automatically on first run)
-cd KMC.Api
-dotnet run
-# Swagger UI opens at https://localhost:7050/swagger — use it to sanity-check
-# endpoints before touching the web client.
-
-# 3. In a second terminal, run the web client
-cd ../KMC.Web
-dotnet run
-# Browse to https://localhost:7100
 ```
 
-If the ports are already taken on your machine, edit `applicationUrl` in each project's
-`Properties/launchSettings.json`, and update `ApiBaseUrl` in `KMC.Web/appsettings.json` to match.
+### Restore dependencies
 
-**Important before you submit:** replace the placeholder JWT secret in
-`KMC.Api/appsettings.json` (`Jwt:Key`) with your own random 32+ character string, and don't
-commit real secrets if this goes in a public repo.
+```bash
+dotnet restore
+```
 
-## What's already working
+### Build the solution
 
-- Organizer registration/login issuing a JWT (`AuthController`)
-- Public search & filter by keyword/type/date range (`GET /api/events`)
-- Event CRUD with ownership checks (`EventsController`)
-- Participant registration with a capacity check (`RegistrationsController`)
-- MVC client: public browse/search/details/register pages, organizer login/register,
-  and a dashboard to create/edit/delete events
+```bash
+dotnet build
+```
 
-## What you should still add or customize
+### Run the API
 
-1. **Data validation** — add `[Required]`/`[StringLength]` attributes to the DTOs and
-   view models, and show validation errors properly in the Razor views
-   (`asp-validation-for`, plus the jQuery unobtrusive validation scripts in `_Layout.cshtml`
-   if you want live client-side validation).
-2. **A registrations-list view** for organizers (`GET /api/events/{id}/registrations`
-   already exists in the API — just needs a Dashboard action + view to display it).
-3. **Styling/branding** — swap in Kandy MC colours/logo, adjust the Bootstrap theme.
-4. **Testing** — a few unit tests against `EventService`/`RegistrationService` (they take
-   an `ApplicationDbContext`, so an in-memory EF Core provider makes this easy) will
-   strengthen your submission and are easy marks if the module rewards test coverage.
-5. **Deployment note for your write-up** — mention how `KMC.Api` and `KMC.Web` could be
-   deployed and scaled independently (e.g. containers), which is the practical payoff of
-   the SOA argument you're making in Task 1.
+Open a terminal:
 
-## Task 1 (written comparison) — a starting structure
+```bash
+cd KMC.Api
+dotnet run
+```
 
-Not code, but worth planning before you write it:
+The API will run at:
 
-1. Briefly define monolithic vs SOA.
-2. Map the case study's own requirements (multiple departments/organizers, public search,
-   growth in usage, need to integrate with other council systems later) onto the
-   *maintainability* and *scalability* criteria specifically — don't just recite generic
-   pros/cons.
-3. Recommend SOA/microservices-oriented API design (which is what this scaffold sets up),
-   and justify it using the seams already visible in this codebase (Event service vs
-   Registration service vs Auth) as a concrete example.
-4. Note trade-offs honestly (operational complexity, network latency, harder local
-   debugging) — a report that only lists advantages tends to lose marks for not showing
-   critical evaluation.
+```text
+https://localhost:7050
+```
+
+Swagger documentation is available at:
+
+```text
+https://localhost:7050/swagger
+```
+
+### Run the Web Application
+
+Open a second terminal:
+
+```bash
+cd KMC.Web
+dotnet run
+```
+
+The website will run at:
+
+```text
+https://localhost:7100
+```
+
+The SQLite database is created automatically when the API is started.
+
+---
+
+## Running with Visual Studio
+
+1. Open `KMC.sln`
+2. Right-click the solution
+3. Select **Configure Startup Projects**
+4. Select **Multiple startup projects**
+5. Set both `KMC.Api` and `KMC.Web` to **Start**
+6. Click **Apply**
+7. Run the solution with `Ctrl + F5`
+
+---
+
+## API Documentation
+
+Swagger/OpenAPI is included with the API to make the available REST endpoints easy to explore and test.
+
+```text
+https://localhost:7050/swagger
+```
+
+---
+
+## Security Considerations
+
+The application uses JWT authentication for protected API operations.
+
+Ownership checks are performed at the service/API level. For example, an organizer cannot modify or delete another organizer's event simply by changing the event ID in an HTTP request.
+
+The website also restricts access to organizer functionality, but the API remains the authoritative security boundary.
+
+> **Important:** The JWT secret included in the development configuration is intended only for local development. Before deploying the application, replace it with a strong randomly generated secret and store it securely using an appropriate secrets-management solution.
+
+---
+
+## Current Limitations
+
+The current implementation has a few planned improvements:
+
+* Event type is currently stored as a text value rather than a dedicated enumeration/dropdown.
+* Event images currently use category-based placeholder images.
+* Individual event image uploads are not implemented yet.
+* The application has only been tested in a local development environment.
+* Production deployment and cloud hosting have not yet been implemented.
+
+---
+
+## Future Improvements
+
+Potential future improvements include:
+
+* Individual event image uploads
+* Dedicated event categories
+* Email notifications for registrations
+* Advanced organizer analytics
+* Pagination for large event lists
+* Cloud deployment
+* Centralized secrets management
+* Automated testing and CI/CD
+* Containerization using Docker
+
+---
+
+## Academic Context
+
+**Module:** CSE5013 — Service-Oriented Computing
+
+**Assessment:** Task 2 — Service-Oriented Solution
+
+The project was developed to demonstrate service-oriented computing concepts through a RESTful API consumed by a separate web application.
+
+The accompanying academic submission includes the comparison between a traditional monolithic architecture and the implemented service-oriented solution, together with supporting system and architecture diagrams.
+
+---
+
+## Author
+
+**Ruzaik Siyadh**
+
+Software Engineering & Computing Student
+
+---
+
+## License
+
+This project was developed as an academic project for educational purposes.
